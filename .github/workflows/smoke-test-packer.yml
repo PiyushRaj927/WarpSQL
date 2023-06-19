@@ -1,5 +1,6 @@
 name: Smoke Test packer template
 on:
+  workflow_dispatch:
   pull_request:
   push:
     # branches:
@@ -35,7 +36,10 @@ jobs:
 
       - name: Install psql
         run: sudo apt install postgresql-client
-
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
       - name: Run the smoke test
         run: |
           set -eu
