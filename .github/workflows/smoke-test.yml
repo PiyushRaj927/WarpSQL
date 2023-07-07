@@ -106,7 +106,7 @@ jobs:
             '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','smoketest-image']);
             console.log(commitSHA);
             console.log(imageSize);
-            console.log(imageLayers);
+            // console.log(imageLayers);
             console.log(diveAnalysis);
             let githubMessage = `${{ matrix.type }} image analysis based on ${commitSHA}
             Total Size:  ${imageSize}
@@ -117,7 +117,7 @@ jobs:
             <summary>dive analysis </summary>
 
             ${diveAnalysis}
-            
+
             </details>
               `;
             github.rest.issues.createComment({
