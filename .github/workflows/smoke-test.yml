@@ -102,7 +102,7 @@ jobs:
             let commitSHA = context.sha;
             let imageSize = await captureExecOutput('docker', ['image', 'list', '--format="{{.Size}}"','smoketest-image']);
             let imageLayers = await captureExecOutput('docker', ['image', 'history' ,'-H'  ,'--format="table {{.CreatedBy}} \\t\\t {{.Size}}"' ,'smoketest-image']);
-            let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v /var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','smoketest-image']);
+            let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v="/var/run/docker.sock:/var/run/docker.sock"', 'wagoodman/dive:latest','smoketest-image']);
             console.log(commitSHA);
             console.log(imageSize);
             console.log(imageLayers);
