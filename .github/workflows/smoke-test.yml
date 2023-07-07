@@ -23,7 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         pg: [15]
-        type: ['normal', 'bitnami']
+        # type: ['normal', 'bitnami']
+        type: ['normal']
     permissions:
       pull-requests: write
     steps:
@@ -101,17 +102,24 @@ jobs:
             let commitSHA = context.sha;
             let imageSize = await captureExecOutput('docker', ['image', 'list', '--format="{{.Size}}"','smoketest-image']);
             let imageLayers = await captureExecOutput('docker', ['image', 'history' ,'-H'  ,'--format="table {{.CreatedBy}} \\t\\t {{.Size}}"' ,'smoketest-image']);
+            let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true', '-it','-v /var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','smoketest-image']);
             console.log(commitSHA);
             console.log(imageSize);
             console.log(imageLayers);
+            console.log(diveAnalysis);
             let githubMessage = `${{ matrix.type }} image analysis on ${commitSHA}
             Total Size:  ${imageSize}
             layers
             ${imageLayers}
-            `;
+
+            ----------------------------------------------------------
+            ${diveAnalysis}
+              `;
             github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: githubMessage
               });
+# TODO: fix table output
+# TODO: add dive config file
