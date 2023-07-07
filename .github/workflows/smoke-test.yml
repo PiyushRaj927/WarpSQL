@@ -82,45 +82,6 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            // https://github.com/yuichielectric/dive-action/blob/5dee0f278f39f7314a8daccc0ea40d08badc3bf3/src/main.ts#L7C1-L44C2
-            function format(output) {
-            const ret = ['**The container image has inefficient files.**']
-            let summarySection = false
-            let inefficientFilesSection = false
-            let resultSection = false
-          
-            for (const line of output.split('\n')) {
-              if (line.includes('Analyzing image')) {
-                summarySection = true
-                inefficientFilesSection = false
-                resultSection = false
-                ret.push('### Summary')
-              } else if (line.includes('Inefficient Files:')) {
-                summarySection = false
-                inefficientFilesSection = true
-                resultSection = false
-                ret.push('### Inefficient Files')
-              } else if (line.includes('Results:')) {
-                summarySection = false
-                inefficientFilesSection = false
-                resultSection = true
-                ret.push('### Results')
-              } else if (summarySection || resultSection) {
-                ret.push(stripAnsi(line))
-              } else if (inefficientFilesSection) {
-                if (line.startsWith('Count')) {
-                  ret.push('| Count | Wasted Space | File Paht |')
-                  ret.push('|---|---|---|')
-                } else {
-                  // https://github.com/wagoodman/dive/blob/master/runtime/ci/evaluator.go#L140
-                  ret.push(
-                    `| ${line.slice(0, 5)} | ${line.slice(7, 19)} | ${line.slice(21)} |`
-                  )
-                }
-              }
-            }
-            return ret.join('\n')
-            }
             async function captureExecOutput(command,arguments){
             let myOutput = '';
             let myError = '';
@@ -141,8 +102,8 @@ jobs:
             let commitSHA = context.sha;
             let imageSize = await captureExecOutput('docker', ['image', 'list', '--format','{{.Size}}','smoketest-image']);
             let imageLayers = await captureExecOutput('docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
-            let diveAnalysis = format(await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v',
-            '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','smoketest-image']));
+            let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v',
+            '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','smoketest-image']);
             console.log(commitSHA);
             console.log(imageSize);
             console.log(imageLayers);
