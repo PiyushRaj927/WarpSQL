@@ -83,7 +83,7 @@ jobs:
         with:
           script: |
             // https://github.com/yuichielectric/dive-action/blob/5dee0f278f39f7314a8daccc0ea40d08badc3bf3/src/main.ts#L7C1-L44C2
-            function format(output: string): string {
+            function format(output) {
             const ret = ['**The container image has inefficient files.**']
             let summarySection = false
             let inefficientFilesSection = false
