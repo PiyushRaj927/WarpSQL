@@ -24,7 +24,7 @@ jobs:
       matrix:
         pg: [15]
         # type: ['normal', 'bitnami']
-        type: ['normal']
+        type: ['bitnami']
     permissions:
       pull-requests: write
     steps:
