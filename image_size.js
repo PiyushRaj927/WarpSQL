@@ -84,10 +84,11 @@ module.exports = async ({
   let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
   let githubMessage = `# ${core.getInput('image-type', { required: true })} image analysis based on ${commitSHA}
 ## Summary
-\`Total Size\`:  ${imageSize}
-\`Efficiency\`: ${efficiency}
-\`wastedBytes\`: ${wastedBytes}
-\`userWastedPercent\`: ${userWastedPercent}
+
+- **Total Size:** ${imageSize.trim()}
+- **Efficiency:** ${efficiency}
+- **Wasted Bytes:** ${wastedBytes}
+- **User Wasted Percent:** ${userWastedPercent}
 
 ----------------------------------------------------------
 ## Inefficient Files:
@@ -110,8 +111,8 @@ ${detailsTable}
 
   return "Success"
 }
-// TODO: add dive config file
-// TODO: add a seperate script
-// TODO: add artifact upoload 
+// TODO: add dive config file [done]
+// TODO: add a seperate script [done]
+// TODO: add artifact upoload []
 // TODO: add the result section and custom annotation
 // TODO: mark old messages as outdated
