@@ -82,35 +82,43 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            function generateMarkdownTable(input) {
-              const lines = input.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '').split('\n').map(line => line.trim()).filter(line => line !== '');
-            
-              const efficiency = lines[2].split(':')[1].trim();
-              const wastedBytes = lines[3].split(':')[1].trim();
-              const userWastedPercent = lines[4].split(':')[1].trim();
-            
-              const tableHeader = 'Count|Wasted Space|File Path\n--|--|--';
-              const tableRows = lines.slice(7).map(line => {
-                const [count, wastedSpace, filePath] = line.split(' ');
-                return `${count} | ${wastedSpace} | ${filePath}`;
-              });
-            
-              const markdownTable = [tableHeader, ...tableRows.slice(10)].join('\n');
-            
-              const detailsTable = [tableHeader, ...tableRows.slice(0, 10)].join('\n');
-            
-              const output = `efficiency: ${efficiency}\n`
-                + `wastedBytes: ${wastedBytes}\n`
-                + `userWastedPercent: ${userWastedPercent}\n`
-                + 'the below should be in a markdown table\n'
-                + 'Inefficient Files:\n\n'
-                +  detailsTable
-                + '\n<details>\n'
-                + '            <summary>dive analysis </summary>\n\n'
-                + markdownTable
-                + '</details>';
-            
-              return output;
+            function parseDiveOutput(imageAnalysis) {
+              let inefficientFilesSection = false;
+              let resultSection = false;
+                            const tableHeader = 'Count|Wasted Space|File Path\n--|--|--';
+            let efficiency,wastedBytes,userWastedPercent;
+            let tableRows =[];
+              for (const line of imageAnalysis.split('\n')) {
+                if (line.includes('efficiency')) {
+                  efficiency = line.split(':')[1].trim()||'undefiened';
+                } else if (line.includes('wastedBytes:')) {
+                  wastedBytes = line.split(':')[1].trim() ||'undefiened';
+                } else if (line.includes('userWastedPercent:')) {
+                userWastedPercent = line.split(':')[1].trim() ||'undefiened';
+                }else if (line.includes('Inefficient Files:')) {
+                inefficientFilesSection = true;
+                } else if (inefficientFilesSection) {
+                  if (! line.startsWith('Count')) {
+                    tableRows.push(
+                      `| ${line.slice(0, 5)} | ${line.slice(7, 19)} | ${line.slice(21)} |`
+                    )}}}
+                const detailsTable = [tableHeader, ...tableRows.slice(10)].join('\n');
+                        
+                const mostInefficientFiles = [tableHeader, ...tableRows.slice(0, 10)].join('\n');
+                
+              // const output = +`efficiency: ${efficiency}\n`
+              //               + `wastedBytes: ${wastedBytes}\n`
+              //               + `userWastedPercent: ${userWastedPercent}\n`
+              //               + 'the below should be in a markdown table\n'
+              //               + 'Inefficient Files:\n\n'
+              //               +  detailsTable
+              //               + '\n\n<details>\n'
+              //               + '            <summary>dive analysis </summary>\n\n'
+              //               + markdownTable
+              //               + '\n\n<details>\n';
+                      
+                        
+                return [efficiency,wastedBytes,userWastedPercent,mostInefficientFiles,detailsTable];
             }
             async function captureExecOutput(command,arguments){
             let myOutput = '';
@@ -139,16 +147,22 @@ jobs:
             // console.log(imageLayers);
             console.log(diveAnalysis);
             // remove the ANSI color codes
-            let diveAnalysisCleaned  = generateMarkdownTable(diveAnalysis);
-            let githubMessage = `${{ matrix.type }} image analysis based on ${commitSHA}
+            let [efficiency,wastedBytes,userWastedPercent,mostInefficientFiles,detailsTable]  = parseDiveOutput(diveAnalysis);
+            let githubMessage = `# ${{ matrix.type }} image analysis based on ${commitSHA}
+            ## Summary
             Total Size:  ${imageSize}
-            
-
+            Efficiency: ${efficiency}
+            wastedBytes: ${wastedBytes}
+            userWastedPercent: ${userWastedPercent}
             ----------------------------------------------------------
-            <details>
-            <summary>dive analysis </summary>
+            Inefficient Files:
+            ${mostInefficientFiles}
 
-            ${diveAnalysisCleaned}
+            <details>
+
+            <summary>Full output </summary>
+
+            ${markdownTable}
 
             </details>
               `;
