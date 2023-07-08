@@ -108,6 +108,8 @@ jobs:
             console.log(imageSize);
             // console.log(imageLayers);
             console.log(diveAnalysis);
+            // remove the ANSI color codes
+            let diveAnalysisCleaned  = diveAnalysis.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
             let githubMessage = `${{ matrix.type }} image analysis based on ${commitSHA}
             Total Size:  ${imageSize}
             
@@ -116,7 +118,7 @@ jobs:
             <details>
             <summary>dive analysis </summary>
 
-            ${diveAnalysis}
+            ${diveAnalysisCleaned}
 
             </details>
               `;
