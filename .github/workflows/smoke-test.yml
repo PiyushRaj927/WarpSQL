@@ -83,12 +83,14 @@ jobs:
         with:
           script: |
             function parseDiveOutput(imageAnalysis) {
+              //remove ansi codes
+              let cleanText = imageAnalysis.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
               let inefficientFilesSection = false;
               let resultSection = false;
                             const tableHeader = 'Count|Wasted Space|File Path\n--|--|--';
             let efficiency,wastedBytes,userWastedPercent;
             let tableRows =[];
-              for (const line of imageAnalysis.split('\n')) {
+              for (const line of cleanText.split('\n')) {
                 if (line.includes('efficiency')) {
                   efficiency = line.split(':')[1].trim()||'undefiened';
                 } else if (line.includes('wastedBytes:')) {
@@ -145,7 +147,7 @@ jobs:
             console.log(commitSHA);
             console.log(imageSize);
             // console.log(imageLayers);
-            console.log(diveAnalysis);
+            // console.log(diveAnalysis);
             // remove the ANSI color codes
             let [efficiency,wastedBytes,userWastedPercent,mostInefficientFiles,detailsTable]  = parseDiveOutput(diveAnalysis);
             let githubMessage = `# ${{ matrix.type }} image analysis based on ${commitSHA}
@@ -162,7 +164,7 @@ jobs:
 
             <summary>Full output </summary>
 
-            ${markdownTable}
+            ${detailsTable}
 
             </details>
               `;
