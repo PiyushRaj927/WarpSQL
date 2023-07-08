@@ -125,7 +125,7 @@ jobs:
                         
                 return [efficiency,wastedBytes,userWastedPercent,mostInefficientFiles,detailsTable];
             }
-            async function captureExecOutput(command,arguments){
+            async function captureExecOutput(command,arguments,ignoreExitCode=false){
             let myOutput = '';
             let myError = '';
 
@@ -138,6 +138,7 @@ jobs:
                 myError += data.toString();
               }
             };
+              if (ignoreExitCode){options.ignoreReturnCode=true;};
             await exec.exec(command,arguments,options);
             console.log(myOutput);
             return myOutput;
@@ -146,7 +147,7 @@ jobs:
             let imageSize = await captureExecOutput('docker', ['image', 'list', '--format','{{.Size}}','smoketest-image']);
             // let imageLayers = await captureExecOutput('docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
             let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v','${{ github.workspace }}/.dive-ci:/tmp/.dive-ci','-v',
-            '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','--ci-config','/tmp/.dive-ci','smoketest-image']);
+            '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','--ci-config','/tmp/.dive-ci','smoketest-image'],true);
             console.log(commitSHA);
             console.log(imageSize);
             // console.log(imageLayers);
@@ -181,4 +182,5 @@ jobs:
 # TODO: add dive config file
 # TODO: add a seperate script
 # TODO: add artifact uoload 
+# TODO: add the result section and custom annotation
 # TODO: mark old messages as outdated
