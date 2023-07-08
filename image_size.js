@@ -73,7 +73,7 @@ module.exports = async ({
   let commitSHA = context.sha;
   let imageSize = await captureExecOutput(exec,'docker', ['image', 'list', '--format', '{{.Size}}', 'smoketest-image']);
   // let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
-  let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', '${{ github.workspace }}/.dive-ci:/tmp/.dive-ci', '-v',
+  let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${core.getInput('workspace', { required: true })}/.dive-ci:/tmp/.dive-ci`, '-v',
       '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest', '--ci-config', '/tmp/.dive-ci', 'smoketest-image'
   ], true);
   console.log(commitSHA);
@@ -82,7 +82,7 @@ module.exports = async ({
   // console.log(diveAnalysis);
   // remove the ANSI color codes
   let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
-  let githubMessage = `# ${core.getInput('inputName', { required: true })} image analysis based on ${commitSHA}
+  let githubMessage = `# ${core.getInput('image-type', { required: true })} image analysis based on ${commitSHA}
 ## Summary
 \`Total Size\`:  ${imageSize}
 \`Efficiency\`: ${efficiency}
@@ -112,6 +112,6 @@ ${detailsTable}
 }
 // TODO: add dive config file
 // TODO: add a seperate script
-// TODO: add artifact uoload 
+// TODO: add artifact upoload 
 // TODO: add the result section and custom annotation
 // TODO: mark old messages as outdated

@@ -85,6 +85,8 @@ jobs:
       - name: comment the image size
         uses: actions/github-script@v6.4.1
         with:
+          workspace: ${{ github.workspace }}
+          image-type: ${{matrix.pg}}
           script: |
             const script = require('./image_size.js')
             console.log(script({github, context, exec,core}))
