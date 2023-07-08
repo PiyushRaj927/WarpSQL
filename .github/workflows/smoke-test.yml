@@ -142,8 +142,8 @@ jobs:
             let commitSHA = context.sha;
             let imageSize = await captureExecOutput('docker', ['image', 'list', '--format','{{.Size}}','smoketest-image']);
             // let imageLayers = await captureExecOutput('docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
-            let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v',
-            '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','smoketest-image']);
+            let diveAnalysis = await captureExecOutput('docker', ['run', '--rm','-e', 'CI=true','-v','.dive-ci:/tmp/.dive-ci','-v',
+            '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest','--ci-config','/tmp/.dive-ci','smoketest-image']);
             console.log(commitSHA);
             console.log(imageSize);
             // console.log(imageLayers);
@@ -152,12 +152,13 @@ jobs:
             let [efficiency,wastedBytes,userWastedPercent,mostInefficientFiles,detailsTable]  = parseDiveOutput(diveAnalysis);
             let githubMessage = `# ${{ matrix.type }} image analysis based on ${commitSHA}
             ## Summary
-            Total Size:  ${imageSize}
-            Efficiency: ${efficiency}
-            wastedBytes: ${wastedBytes}
-            userWastedPercent: ${userWastedPercent}
+            \`Total Size\`:  ${imageSize}
+            \`Efficiency\`: ${efficiency}
+            \`wastedBytes\`: ${wastedBytes}
+            \`userWastedPercent\`: ${userWastedPercent}
+
             ----------------------------------------------------------
-            Inefficient Files:
+            ## Inefficient Files:
             ${mostInefficientFiles}
 
             <details>
@@ -174,5 +175,4 @@ jobs:
                 repo: context.repo.repo,
                 body: githubMessage
               });
-# TODO: fix table output
 # TODO: add dive config file
