@@ -64,7 +64,7 @@ async function captureExecOutput(exec, command, arguments, ignoreExitCode = fals
   return myOutput;
 }
 
-module.exports = ({
+module.exports = async ({
   github,
   context,
   exec,
@@ -72,7 +72,7 @@ module.exports = ({
 }) => {
   let commitSHA = context.sha;
   let imageSize = await captureExecOutput(exec,'docker', ['image', 'list', '--format', '{{.Size}}', 'smoketest-image']);
-  // let imageLayers = await captureExecOutput('docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
+  // let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
   let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', '${{ github.workspace }}/.dive-ci:/tmp/.dive-ci', '-v',
       '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest', '--ci-config', '/tmp/.dive-ci', 'smoketest-image'
   ], true);
