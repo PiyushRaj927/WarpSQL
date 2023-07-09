@@ -8,11 +8,11 @@ function parseDiveOutput(imageAnalysis) {
   let tableRows = [];
   for (const line of cleanText.split('\n')) {
       if (line.includes('efficiency')) {
-          efficiency = line.split(':')[1].trim() || 'undefiened';
+          efficiency = parseFloat(line.split(':')[1].trim().slice(0,-2)) ;
       } else if (line.includes('wastedBytes:')) {
-          wastedBytes = line.split(':')[1].trim() || 'undefiened';
+          wastedBytes = parseInt(line.split(':')[1].trim().split(" ")[0]) ;
       } else if (line.includes('userWastedPercent:')) {
-          userWastedPercent = line.split(':')[1].trim() || 'undefiened';
+          userWastedPercent = parseFloat(line.split(':')[1].trim().slice(0,-2)) ;
       } else if (line.includes('Inefficient Files:')) {
           inefficientFilesSection = true;
       } else if (inefficientFilesSection) {
@@ -55,6 +55,50 @@ async function saveMetricsToFile(metrics) {
     }
   }
 
+  async function readMetricsFromFile() {
+    const filePath = '/tmp/image-metrics.json';  
+    try {
+      const jsonData = await fs.promises.readFile(filePath);
+      const metrics = JSON.parse(jsonData);
+      return metrics;
+    } catch (error) {
+      console.error(`Error reading metrics from ${filePath}: ${error}`);
+      return null;
+    }
+  }
+
+  function parseSizeToBytes(value,unit) {
+  let bytes;
+  
+  switch (unit) {
+    case 'KB':
+      bytes = value * 1024;
+      break;
+    case 'MB':
+      bytes = value * 1024 * 1024;
+      break;
+    case 'GB':
+      bytes = value * 1024 * 1024 * 1024;
+      break;
+    default:
+      throw new Error('Invalid size unit');
+  }
+  
+  return bytes;
+}
+
+function formatBytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
 async function captureExecOutput(exec, command, arguments, ignoreExitCode = false) {
   let myOutput = '';
   let myError = '';
@@ -76,6 +120,17 @@ async function captureExecOutput(exec, command, arguments, ignoreExitCode = fals
   return myOutput;
 }
 
+function calculatePercentageChange(currentValue, previousValue) {
+  if (previousValue === 0) {
+    return null;
+  }
+
+  const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+  const colorIndicator = percentageChange > 0 ? ':arrow_up:' : ':arrow_down:';
+
+  const formattedChange = `[${percentageChange.toFixed(2)}  ${colorIndicator}]`;
+  return formattedChange;
+}
 module.exports = async ({
   github,
   context,
@@ -84,8 +139,20 @@ module.exports = async ({
 }) => {
   let commitSHA = context.sha;
   let imageSize = await captureExecOutput(exec,'docker', ['image', 'list', '--format', '{{.Size}}', 'smoketest-image']);
+  imageSizeInBytes = parseSizeToBytes(imageSize.trim().slice(0,-2), imageSize.trim().slice(-2))
   // let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
-  let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${core.getInput('workspace', { required: true })}/.dive-ci:/tmp/.dive-ci`, '-v',
+  const imageType = core.getInput('image-type', { required: true });
+  // const existingMetrics = await readMetricsFromFile() || [];
+  const existingMetrics =  [ {
+    imageId: "bitnami",
+    imageSize: 7,
+    efficiency: 98,
+    wastedBytes: 250589999 ,
+    userWastedPercent: 5
+  }];
+  const workspace = core.getInput('workspace', { required: true });
+  const metricToCompare = existingMetrics.findIndex(metric => metric.imageId === imageType);
+  let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${workspace}/.dive-ci:/tmp/.dive-ci`, '-v',
       '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest', '--ci-config', '/tmp/.dive-ci', 'smoketest-image'
   ], true);
   console.log(commitSHA);
@@ -94,13 +161,13 @@ module.exports = async ({
   // console.log(diveAnalysis);
   // remove the ANSI color codes
   let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
-  let githubMessage = `### :bar_chart: ${core.getInput('image-type', { required: true })} Image Analysis  (Commit: ${commitSHA} )
+  let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
 #### Summary
 
-- **Total Size:** ${imageSize.trim()}
-- **Efficiency:** ${efficiency}
-- **Wasted Bytes:** ${wastedBytes}
-- **User Wasted Percent:** ${userWastedPercent}
+- **Total Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
+- **Efficiency:** ${efficiency} % ${calculatePercentageChange(efficiency,metricToCompare.efficiency)}
+- **Wasted Bytes:** ${formatBytes(wastedBytes)} ${calculatePercentageChange(wastedBytes,metricToCompare.wastedBytes)}
+- **User Wasted Percent:** ${userWastedPercent} % ${calculatePercentageChange(userWastedPercent,metricToCompare.userWastedPercent)}
 
 #### Inefficient Files:
 ${mostInefficientFiles}`
@@ -113,6 +180,7 @@ ${mostInefficientFiles}`
 // </details>
 // `
 ;
+
   github.rest.issues.createComment({
       issue_number: context.issue.number,
       owner: context.repo.owner,
@@ -120,17 +188,17 @@ ${mostInefficientFiles}`
       body: githubMessage
   });
 
-  const metrics = {
+  const metrics = [{
+    imageId: "bitnami",
+    imageSize:imageSizeInBytes,
     efficiency: efficiency,
     wastedBytes: wastedBytes,
     userWastedPercent: userWastedPercent,
-    mostInefficientFiles: mostInefficientFiles,
-    detailsTable: detailsTable
-  };
+  }];
 
   await saveMetricsToFile(metrics);
-  
-  return "Success"
+
+  return "Success";
 }
 // TODO: add dive config file [done]
 // TODO: add a seperate script [done]
