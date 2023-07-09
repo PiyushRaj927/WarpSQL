@@ -43,6 +43,18 @@ function parseDiveOutput(imageAnalysis) {
   return [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable];
 }
 
+async function saveMetricsToFile(metrics) {
+    const filePath = '/tmp/image-metrics.json';
+    const jsonData = JSON.stringify(metrics, null, 2);
+  
+    try {
+      await fs.promises.writeFile(filePath, jsonData);
+      console.log(`Metrics saved to ${filePath}`);
+    } catch (error) {
+      console.error(`Error saving metrics to ${filePath}: ${error}`);
+    }
+  }
+
 async function captureExecOutput(exec, command, arguments, ignoreExitCode = false) {
   let myOutput = '';
   let myError = '';
@@ -108,10 +120,20 @@ ${mostInefficientFiles}`
       body: githubMessage
   });
 
+  const metrics = {
+    efficiency: efficiency,
+    wastedBytes: wastedBytes,
+    userWastedPercent: userWastedPercent,
+    mostInefficientFiles: mostInefficientFiles,
+    detailsTable: detailsTable
+  };
+
+  await saveMetricsToFile(metrics);
+  
   return "Success"
 }
 // TODO: add dive config file [done]
 // TODO: add a seperate script [done]
 // TODO: add artifact upoload 
 // TODO: add the result section and custom annotation
-// TODO: mark old messages as outdated
+// TODO: mark old messages as outdated [done]
