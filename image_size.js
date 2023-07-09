@@ -23,7 +23,7 @@ function parseDiveOutput(imageAnalysis) {
           }
       }
   }
-  const tableRowsToShow = 5
+  const tableRowsToShow = 10
   const detailsTable = [tableHeader, ...tableRows.slice(tableRowsToShow)].join('\n');
 
   const mostInefficientFiles = [tableHeader, ...tableRows.slice(0, tableRowsToShow)].join('\n');
@@ -82,26 +82,25 @@ module.exports = async ({
   // console.log(diveAnalysis);
   // remove the ANSI color codes
   let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
-  let githubMessage = `# ${core.getInput('image-type', { required: true })} image analysis based on ${commitSHA}
-## Summary
+  let githubMessage = `### :bar_chart: ${core.getInput('image-type', { required: true })} Image Analysis  (Commit: ${commitSHA} )
+#### Summary
 
 - **Total Size:** ${imageSize.trim()}
 - **Efficiency:** ${efficiency}
 - **Wasted Bytes:** ${wastedBytes}
 - **User Wasted Percent:** ${userWastedPercent}
 
-----------------------------------------------------------
-## Inefficient Files:
-${mostInefficientFiles}
+#### Inefficient Files:
+${mostInefficientFiles}`
+// + ` <details>
 
-<details>
+// <summary>Full output </summary>
 
-<summary>Full output </summary>
+// ${detailsTable}
 
-${detailsTable}
-
-</details>
-`;
+// </details>
+// `
+;
   github.rest.issues.createComment({
       issue_number: context.issue.number,
       owner: context.repo.owner,
@@ -113,6 +112,6 @@ ${detailsTable}
 }
 // TODO: add dive config file [done]
 // TODO: add a seperate script [done]
-// TODO: add artifact upoload []
+// TODO: add artifact upoload 
 // TODO: add the result section and custom annotation
 // TODO: mark old messages as outdated

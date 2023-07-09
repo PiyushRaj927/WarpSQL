@@ -83,6 +83,7 @@ jobs:
         run: |
           docker logs smoketest-container
       - name: comment the image size
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v6.4.1
         with:
           workspace: ${{ github.workspace }}
@@ -90,3 +91,17 @@ jobs:
           script: |
             const script = require('./image_size.js')
             console.log(script({github, context, exec,core}))
+      - uses: kanga333/comment-hider@master
+        if: github.event_name == 'pull_request'
+        name: Hide bot comments
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          hide_user_name: 'github-actions[bot]'
+          hide_reason: 'OUTDATED'
+          issue_number: ${{ github.event.number }}
+      
+      # - uses: actions/upload-artifact@v3
+      #   if: github.event_name != 'pull_request'
+      #   with:
+      #     name: image-metric
+      #     path: /tmp/image-metric.json
