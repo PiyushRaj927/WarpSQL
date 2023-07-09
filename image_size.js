@@ -152,7 +152,7 @@ module.exports = async ({
     userWastedPercent: 5
   }];
   const workspace = core.getInput('workspace', { required: true });
-  const metricToCompare = existingMetrics.findIndex(metric => metric.imageId === imageType);
+  const metricToCompare = existingMetrics[existingMetrics.findIndex(metric => metric.imageId === imageType)];
   let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${workspace}/.dive-ci:/tmp/.dive-ci`, '-v',
       '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest', '--ci-config', '/tmp/.dive-ci', 'smoketest-image'
   ], true);
