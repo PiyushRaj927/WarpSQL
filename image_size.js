@@ -127,7 +127,8 @@ function calculatePercentageChange(currentValue, previousValue) {
 
   const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
   const colorIndicator = percentageChange > 0 ? ':arrow_up:' : ':arrow_down:';
-
+  console.log(percentageChange);
+  console.log(percentageChange.toFixed(2));
   const formattedChange = `[${percentageChange.toFixed(2)}  ${colorIndicator}]`;
   return formattedChange;
 }
@@ -160,6 +161,9 @@ module.exports = async ({
   // console.log(imageLayers);
   // console.log(diveAnalysis);
   // remove the ANSI color codes
+  console.log(metricToCompare);
+  console.log(metricToCompare.imageSize);
+  console.log(calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize));
   let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
   let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
 #### Summary
