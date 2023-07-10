@@ -43,7 +43,7 @@ function parseDiveOutput(imageAnalysis) {
   return [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable];
 }
 
-async function saveMetricsToFile(metrics) {
+async function saveMetricsToFile(metrics,fs) {
     const filePath = '/tmp/image-metrics.json';
     const jsonData = JSON.stringify(metrics, null, 2);
   
@@ -55,7 +55,7 @@ async function saveMetricsToFile(metrics) {
     }
   }
 
-  async function readMetricsFromFile() {
+  async function readMetricsFromFile(fs) {
     const filePath = '/tmp/image-metrics.json';  
     try {
       const jsonData = await fs.promises.readFile(filePath);
@@ -136,14 +136,15 @@ module.exports = async ({
   github,
   context,
   exec,
-  core
+  core,
+  fs
 }) => {
   let commitSHA = context.sha;
   let imageSize = await captureExecOutput(exec,'docker', ['image', 'list', '--format', '{{.Size}}', 'smoketest-image']);
   imageSizeInBytes = parseSizeToBytes(imageSize.trim().slice(0,-2), imageSize.trim().slice(-2))
   let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
   const imageType = core.getInput('image-type', { required: true });
-  // const existingMetrics = await readMetricsFromFile() || [];
+  // const existingMetrics = await readMetricsFromFile(fs) || [];
   const existingMetrics =  [ {
     imageId: "bitnami",
     imageSize: 7516192768,
@@ -161,6 +162,7 @@ module.exports = async ({
   // console.log(imageLayers);
   // console.log(diveAnalysis);
   // remove the ANSI color codes
+  console.log("fs",fs);
   console.log(metricToCompare);
   console.log(metricToCompare.imageSize);
   console.log(calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize));
@@ -208,7 +210,7 @@ let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${com
     userWastedPercent: userWastedPercent,
   }];
 
-  await saveMetricsToFile(metrics);
+  await saveMetricsToFile(metrics,fs);
 
   return "Success";
 }
