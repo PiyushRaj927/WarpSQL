@@ -166,7 +166,7 @@ module.exports = async ({
   console.log(metricToCompare);
   console.log(metricToCompare.imageSize);
   console.log(calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize));
-  let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
+  // let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
 //   let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
 // #### Summary
 
