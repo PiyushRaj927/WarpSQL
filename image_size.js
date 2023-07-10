@@ -146,7 +146,7 @@ module.exports = async ({
   // const existingMetrics = await readMetricsFromFile() || [];
   const existingMetrics =  [ {
     imageId: "bitnami",
-    imageSize: 7,
+    imageSize: 7516192768,
     efficiency: 98,
     wastedBytes: 250589999 ,
     userWastedPercent: 5
@@ -189,8 +189,7 @@ let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${com
 #### Summary
 
 - **Current Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
-- **Previous Size :** ${formatBytes(metricToCompare.imageSize)}
-userWastedPercent)}`
+- **Previous Size :** ${formatBytes(metricToCompare.imageSize)} 
 
 ;
 
