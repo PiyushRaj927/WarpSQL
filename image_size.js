@@ -144,14 +144,14 @@ module.exports = async ({
   imageSizeInBytes = parseSizeToBytes(imageSize.trim().slice(0,-2), imageSize.trim().slice(-2))
   let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
   const imageType = core.getInput('image-type', { required: true });
-  const existingMetrics = await readMetricsFromFile(fs) || [];
-  // const existingMetrics =  [ {
-  //   imageId: "bitnami",
-  //   imageSize: 7516192768,
-  //   efficiency: 98,
-  //   wastedBytes: 250589999 ,
-  //   userWastedPercent: 5
-  // }];
+  // const existingMetrics = await readMetricsFromFile(fs) || [];
+  const existingMetrics =  [ {
+    imageId: "bitnami",
+    imageSize: 7516192768,
+    efficiency: 98,
+    wastedBytes: 250589999 ,
+    userWastedPercent: 5
+  }];
   const workspace = core.getInput('workspace', { required: true });
   const metricToCompare = existingMetrics[existingMetrics.findIndex(metric => metric.imageId === imageType)];
   let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${workspace}/.dive-ci:/tmp/.dive-ci`, '-v',
@@ -210,7 +210,7 @@ let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${com
     userWastedPercent: userWastedPercent,
   }];
 
-  // await saveMetricsToFile(metrics,fs);
+  await saveMetricsToFile(metrics,fs);
 
   return "Success";
 }
