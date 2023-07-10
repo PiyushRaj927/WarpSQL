@@ -190,7 +190,7 @@ let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${com
 
 - **Current Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
 - **Previous Size :** ${formatBytes(metricToCompare.imageSize)} 
-
+`
 ;
 
   github.rest.issues.createComment({
