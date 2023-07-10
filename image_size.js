@@ -121,7 +121,7 @@ async function captureExecOutput(exec, command, arguments, ignoreExitCode = fals
 }
 
 function calculatePercentageChange(currentValue, previousValue) {
-  if (previousValue || previousValue === 0) {
+  if (!previousValue || previousValue === 0) {
     return null;
   }
 
@@ -144,37 +144,35 @@ module.exports = async ({
   imageSizeInBytes = parseSizeToBytes(imageSize.trim().slice(0,-2), imageSize.trim().slice(-2))
   let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
   const imageType = core.getInput('image-type', { required: true });
-  const existingMetrics = await readMetricsFromFile(fs) || [];
   // const existingMetrics =  [ {
-  //   imageId: "bitnami",
-  //   imageSize: 7516192768,
-  //   efficiency: 98,
-  //   wastedBytes: 250589999 ,
-  //   userWastedPercent: 5
-  // }];
-  const workspace = core.getInput('workspace', { required: true });
-  const metricToCompare = existingMetrics[existingMetrics.findIndex(metric => metric.imageId === imageType)];
-  // let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${workspace}/.dive-ci:/tmp/.dive-ci`, '-v',
-      // '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest', '--ci-config', '/tmp/.dive-ci', 'smoketest-image'
-  // ], true);
-  console.log(commitSHA);
-  console.log(imageSize);
-  // console.log(imageLayers);
-  // console.log(diveAnalysis);
-  // remove the ANSI color codes
-  console.log("fs",fs);
-  console.log(metricToCompare);
-  console.log(metricToCompare.imageSize);
-  console.log(calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize));
-  // let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
-//   let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
-// #### Summary
-
-// - **Total Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
-// - **Efficiency:** ${efficiency} % ${calculatePercentageChange(efficiency,metricToCompare.efficiency)}
-// - **Wasted Bytes:** ${formatBytes(wastedBytes)} ${calculatePercentageChange(wastedBytes,metricToCompare.wastedBytes)}
-// - **User Wasted Percent:** ${userWastedPercent} % ${calculatePercentageChange(userWastedPercent,metricToCompare.userWastedPercent)}
-
+    //   imageId: "bitnami",
+    //   imageSize: 7516192768,
+    //   efficiency: 98,
+    //   wastedBytes: 250589999 ,
+    //   userWastedPercent: 5
+    // }];
+    const workspace = core.getInput('workspace', { required: true });
+    // let diveAnalysis = await captureExecOutput(exec,'docker', ['run', '--rm', '-e', 'CI=true', '-v', `${workspace}/.dive-ci:/tmp/.dive-ci`, '-v',
+    // '/var/run/docker.sock:/var/run/docker.sock', 'wagoodman/dive:latest', '--ci-config', '/tmp/.dive-ci', 'smoketest-image'
+    // ], true);
+    console.log(commitSHA);
+    console.log(imageSize);
+    // console.log(imageLayers);
+    // console.log(diveAnalysis);
+    // remove the ANSI color codes
+    console.log("fs",fs);
+    console.log(metricToCompare);
+    console.log(metricToCompare.imageSize);
+    console.log(calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize));
+    // let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
+    //   let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
+    // #### Summary
+    
+    // - **Total Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
+    // - **Efficiency:** ${efficiency} % ${calculatePercentageChange(efficiency,metricToCompare.efficiency)}
+    // - **Wasted Bytes:** ${formatBytes(wastedBytes)} ${calculatePercentageChange(wastedBytes,metricToCompare.wastedBytes)}
+    // - **User Wasted Percent:** ${userWastedPercent} % ${calculatePercentageChange(userWastedPercent,metricToCompare.userWastedPercent)}
+    
 // #### Inefficient Files:
 // ${mostInefficientFiles}`
 // // + ` <details>
@@ -186,13 +184,16 @@ module.exports = async ({
 // // </details>
 // // `
 // ;
-
-let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
-#### Summary
-
-- **Current Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
-- **Previous Size :** ${formatBytes(metricToCompare.imageSize)} 
-`
+if (context.eventName ==  'pull_request'){
+  const existingMetrics = await readMetricsFromFile(fs) || [];
+  const metricToCompare = existingMetrics[existingMetrics.findIndex(metric => metric.imageId === imageType)];
+  
+  let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
+  #### Summary
+  
+  - **Current Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
+  - **Previous Size :** ${formatBytes(metricToCompare.imageSize)} 
+  `
 ;
 
   github.rest.issues.createComment({
@@ -202,16 +203,17 @@ let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${com
       body: githubMessage
   });
 
+} else if (context.eventName ==  'push'){
   const metrics = [{
-    imageId: "bitnami",
+    imageId: imageType,
     imageSize:imageSizeInBytes,
     // efficiency: efficiency,
     // wastedBytes: wastedBytes,
     // userWastedPercent: userWastedPercent,
   }];
 
-  // await saveMetricsToFile(metrics,fs);
-
+  await saveMetricsToFile(metrics,fs);
+}
   return "Success";
 }
 // TODO: add dive config file [done]
