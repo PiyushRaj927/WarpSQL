@@ -88,9 +88,9 @@ jobs:
       - run: |
           npm install fs
 
-      # - uses: actions/download-artifact@v3
-      #   with:
-      #     name: image-metric
+      - uses: actions/download-artifact@v3
+        with:
+          name: image-metric
 
       - name: comment the image size
         if: github.event_name == 'pull_request'
@@ -113,9 +113,9 @@ jobs:
           leave_visible: 1
           issue_number: ${{ github.event.number }}
       # add dependency jor jobs 
-      - uses: actions/upload-artifact@v3 # make it for running on push to main 
-        if: github.event_name == 'pull_request' 
-        with:
-          name: image-metric
-          path: image-metrics.json
-          if-no-files-found: error
+      # - uses: actions/upload-artifact@v3 # make it for running on push to main 
+      #   if: github.event_name == 'pull_request' 
+      #   with:
+      #     name: image-metric
+      #     path: image-metrics.json
+      #     if-no-files-found: error
