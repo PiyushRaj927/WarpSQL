@@ -126,10 +126,10 @@ function calculatePercentageChange(currentValue, previousValue) {
   }
 
   const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
-  const colorIndicator = percentageChange > 0 ? ':arrow_up:' : ':arrow_down:';
+  const colorIndicator = percentageChange > 0 ? ':small_red_triangle:' : ':small_red_triangle_down:';
   console.log(percentageChange);
   console.log(percentageChange.toFixed(2));
-  const formattedChange = `[${percentageChange.toFixed(2)}  ${colorIndicator}]`;
+  const formattedChange = `[${percentageChange.toFixed(2)} %  ${colorIndicator}]`;
   return formattedChange;
 }
 module.exports = async ({
@@ -141,7 +141,7 @@ module.exports = async ({
   let commitSHA = context.sha;
   let imageSize = await captureExecOutput(exec,'docker', ['image', 'list', '--format', '{{.Size}}', 'smoketest-image']);
   imageSizeInBytes = parseSizeToBytes(imageSize.trim().slice(0,-2), imageSize.trim().slice(-2))
-  // let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
+  let imageLayers = await captureExecOutput(exec,'docker', ['image', 'history' ,'-H'  ,'--format','table {{.CreatedBy}} \\t\\t {{.Size}}' ,'smoketest-image']);
   const imageType = core.getInput('image-type', { required: true });
   // const existingMetrics = await readMetricsFromFile() || [];
   const existingMetrics =  [ {
@@ -165,24 +165,33 @@ module.exports = async ({
   console.log(metricToCompare.imageSize);
   console.log(calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize));
   let [efficiency, wastedBytes, userWastedPercent, mostInefficientFiles, detailsTable] = parseDiveOutput(diveAnalysis);
-  let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
+//   let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
+// #### Summary
+
+// - **Total Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
+// - **Efficiency:** ${efficiency} % ${calculatePercentageChange(efficiency,metricToCompare.efficiency)}
+// - **Wasted Bytes:** ${formatBytes(wastedBytes)} ${calculatePercentageChange(wastedBytes,metricToCompare.wastedBytes)}
+// - **User Wasted Percent:** ${userWastedPercent} % ${calculatePercentageChange(userWastedPercent,metricToCompare.userWastedPercent)}
+
+// #### Inefficient Files:
+// ${mostInefficientFiles}`
+// // + ` <details>
+
+// // <summary>Full output </summary>
+
+// // ${detailsTable}
+
+// // </details>
+// // `
+// ;
+
+let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
 #### Summary
 
-- **Total Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
-- **Efficiency:** ${efficiency} % ${calculatePercentageChange(efficiency,metricToCompare.efficiency)}
-- **Wasted Bytes:** ${formatBytes(wastedBytes)} ${calculatePercentageChange(wastedBytes,metricToCompare.wastedBytes)}
-- **User Wasted Percent:** ${userWastedPercent} % ${calculatePercentageChange(userWastedPercent,metricToCompare.userWastedPercent)}
+- **Current Size:** ${formatBytes(imageSizeInBytes)} ${calculatePercentageChange(imageSizeInBytes,metricToCompare.imageSize)}
+- **Previous Size :** ${formatBytes(metricToCompare.imageSize)}
+userWastedPercent)}`
 
-#### Inefficient Files:
-${mostInefficientFiles}`
-// + ` <details>
-
-// <summary>Full output </summary>
-
-// ${detailsTable}
-
-// </details>
-// `
 ;
 
   github.rest.issues.createComment({
