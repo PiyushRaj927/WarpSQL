@@ -86,7 +86,6 @@ jobs:
         with:
           node-version: 16
       - run: |
-          npm ci
           npm install fs
       - name: comment the image size
         if: github.event_name == 'pull_request'
