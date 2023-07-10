@@ -82,6 +82,12 @@ jobs:
         if: always()
         run: |
           docker logs smoketest-container
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: |
+          npm ci
+          npm install fs
       - name: comment the image size
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6.4.1
@@ -89,8 +95,10 @@ jobs:
           workspace: ${{ github.workspace }}
           image-type: ${{matrix.type}}
           script: |
+            const fs = require('fs')
             const script = require('./image_size.js')
-            console.log(script({github, context, exec,core}))
+            console.log("from the main script",fs)
+            console.log(script({github, context, exec,core,fs}))
       - uses: kanga333/comment-hider@master
         if: github.event_name == 'pull_request'
         name: Hide bot comments
@@ -106,3 +114,4 @@ jobs:
         with:
           name: image-metric
           path: /tmp/image-metrics.json
+          if-no-files-found: error
