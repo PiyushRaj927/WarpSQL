@@ -205,9 +205,9 @@ let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${com
   const metrics = [{
     imageId: "bitnami",
     imageSize:imageSizeInBytes,
-    efficiency: efficiency,
-    wastedBytes: wastedBytes,
-    userWastedPercent: userWastedPercent,
+    // efficiency: efficiency,
+    // wastedBytes: wastedBytes,
+    // userWastedPercent: userWastedPercent,
   }];
 
   // await saveMetricsToFile(metrics,fs);
