@@ -104,6 +104,7 @@ jobs:
           script: |
             const fs = require('fs')
             const script = require('./image_size.js')
+            console.log(script({github, context, exec,core,fs}))
 
       - name: Hide bot comments
         uses: kanga333/comment-hider@master
