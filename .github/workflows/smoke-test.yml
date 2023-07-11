@@ -97,6 +97,7 @@ jobs:
           branch: imgae_size
           name: image-metric
           check_artifacts: true
+          search_artifacts: true
           if_no_artifact_found: fail
 
       - name: comment the image size
