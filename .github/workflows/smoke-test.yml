@@ -5,10 +5,10 @@ concurrency:
   cancel-in-progress: true
   
 on:
-  # pull_request:
-  push:
-    branches:
-      - image_size
+  pull_request:
+  # push:
+  #   branches:
+  #     - image_size
 
 env:
   ORG: timescaledev
