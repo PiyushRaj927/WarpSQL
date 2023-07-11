@@ -145,7 +145,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
   
   - **Current Size:** ${formatBytes(
       imageSizeInBytes
-    )} ${calculatePercentageChange(imageSizeInBytes, metricToCompare.imageSize || null)}
+    )} ${calculatePercentageChange(imageSizeInBytes, metricToCompare?.imageSize || null)}
   - **Previous Size :** ${formatBytes(metricToCompare.imageSize)} 
   `;
     github.rest.issues.createComment({
