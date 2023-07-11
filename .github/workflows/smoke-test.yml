@@ -94,6 +94,7 @@ jobs:
           name: image-metric
           check_artifacts: true
           search_artifacts: true
+          if_no_artifact_found: warn
 
       - name: Analyse image
         uses: actions/github-script@v6.4.1
