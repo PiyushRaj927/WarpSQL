@@ -113,7 +113,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           hide_user_name: "github-actions[bot]"
           hide_reason: "OUTDATED"
-          leave_visible: 1
+          leave_visible: 2
           issue_number: ${{ github.event.number }}
 
       - uses: actions/upload-artifact@v3
