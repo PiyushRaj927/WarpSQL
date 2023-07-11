@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
   
 on:
-  pull_request:
+  # pull_request:
   push:
     branches:
       - image_size
@@ -93,8 +93,10 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: smoke-test.yml
+          # workflow: smoke-test.yml
+          branch: imgae_size
           name: image-metric
+          check_artifacts: true
           if_no_artifact_found: fail
 
       - name: comment the image size
