@@ -43,6 +43,7 @@ function parseSizeToBytes(value, unit) {
 }
 
 function formatBytes(bytes, decimals = 2) {
+  if (bytes == null ) return "Unknown"
   if (!+bytes) return "0 Bytes";
 
   const k = 1024;
@@ -92,7 +93,7 @@ async function captureExecOutput(
 
 function calculatePercentageChange(currentValue, previousValue) {
   if (!previousValue || previousValue === 0) {
-    return null;
+    return '';
   }
 
   const percentageChange =
@@ -144,7 +145,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
   
   - **Current Size:** ${formatBytes(
       imageSizeInBytes
-    )} ${calculatePercentageChange(imageSizeInBytes, metricToCompare.imageSize)}
+    )} ${calculatePercentageChange(imageSizeInBytes, metricToCompare.imageSize || null)}
   - **Previous Size :** ${formatBytes(metricToCompare.imageSize)} 
   `;
     github.rest.issues.createComment({
