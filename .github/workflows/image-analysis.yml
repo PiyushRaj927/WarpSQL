@@ -27,14 +27,13 @@ jobs:
         type: ["normal", "bitnami"]
     steps:
         # wait till the smoke test is passed
-      - name: Wait for tests to succeed
-        uses: lewagon/wait-on-check-action@v1.3.1
+      - name: Pause until all workflows are completed
+        uses: willgarcia/workflow-wait-action@v0.1.0
         with:
-          ref: ${{ github.ref }}
-          check-name: 'PG${{ matrix.pg }}-${{ matrix.type }}'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+          timeout: 600
+          interval: 10
+          initial_delay: 30
 
       - name: Check out the source
         uses: actions/checkout@v3
