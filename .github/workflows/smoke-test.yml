@@ -77,3 +77,14 @@ jobs:
         if: always()
         run: |
           docker logs smoketest-container
+      
+      - name: export the image
+        run : |
+          docker export smoketest-image > ${{matrix.type}}-${{ github.ref }}.tar 
+            
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{matrix.type}}-${{ github.ref }}
+          path: ./${{matrix.type}}-${{ github.ref }}.tar 
+    

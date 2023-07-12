@@ -37,20 +37,17 @@ jobs:
           workflows: |
             Smoke Test Docker Image
 
-      - name: Check out the source
-        uses: actions/checkout@v3
-
-      - name: Expose GitHub Runtime
-        uses: crazy-max/ghaction-github-runtime@v2
-
-      - name: Build Docker Image for TimescaleDB
+      - name: Download image
+        uses: dawidd6/action-download-artifact@v2.27.0
+        with:
+            workflow: image-analysis.yml
+            name: ${{matrix.type}}-${{ github.ref }}
+            check_artifacts: true
+            search_artifacts: true
+    
+      - name: Load image
         run: |
-          if [ ${{ matrix.type }} == bitnami ]
-          then
-            cd bitnami
-          fi
-          make build-docker-cache image PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
-
+            docker load --input ./${{matrix.type}}-${{ github.ref }}.tar 
       # set up dependency for github scripts
       - uses: actions/setup-node@v3
         with:
