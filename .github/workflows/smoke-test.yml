@@ -80,7 +80,7 @@ jobs:
       
       - name: export the image
         run : |
-          set -eu
+          set -eux
           export PGHOST=localhost
           export PGUSER=postgres
           export PGPASSWORD=test1234
