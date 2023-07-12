@@ -34,6 +34,8 @@ jobs:
           timeout: 600
           interval: 10
           initial_delay: 30
+          workflows: |
+            Smoke Test Docker Image
 
       - name: Check out the source
         uses: actions/checkout@v3
