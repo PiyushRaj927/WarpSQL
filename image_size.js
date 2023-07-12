@@ -1,5 +1,5 @@
-async function saveMetricsToFile(metrics, fs) {
-  const filePath = "image-metrics.json";
+async function saveToFile(metrics, fs,path) {
+  const filePath = path;
   const jsonData = JSON.stringify(metrics, null, 2);
 
   try {
@@ -10,8 +10,8 @@ async function saveMetricsToFile(metrics, fs) {
   }
 }
 
-async function readMetricsFromFile(fs) {
-  const filePath = "image-metrics.json";
+async function readFromFile(fs,path) {
+  const filePath = path;
   try {
     const jsonData = await fs.promises.readFile(filePath);
     const metrics = JSON.parse(jsonData);
@@ -108,6 +108,21 @@ function calculatePercentageChange(currentValue, previousValue) {
   return formattedChange;
 }
 
+function createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare) {
+  const currentSize = formatBytes(imageSizeInBytes);
+  const previousSize = formatBytes(metricToCompare?.imageSize || null);
+  const percentageChange = calculatePercentageChange(imageSizeInBytes, metricToCompare?.imageSize || null);
+
+  const githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
+  #### Summary
+  
+  - **Current Size:** ${currentSize} ${percentageChange}
+  - **Previous Size :** ${previousSize}`;
+
+  return githubMessage;
+}
+
+
 module.exports = async ({ github, context, exec, core, fs }) => {
   let commitSHA = context.sha;
   let imageSize = await captureExecOutput(exec, "docker", [
@@ -133,35 +148,27 @@ module.exports = async ({ github, context, exec, core, fs }) => {
 
   const workspace = core.getInput("workspace", { required: true });
 
+  const existingMetrics = (await readFromFile(fs,"image-metrics-" + imageType + ".json")) || {};
   if (context.eventName == "pull_request") {
-    const existingMetrics = (await readMetricsFromFile(fs)) || [];
-    const metricToCompare =
-      existingMetrics[
-      existingMetrics.findIndex((metric) => metric.imageId === imageType)
-      ];
+    const metricToCompare = existingMetrics[imageType];
 
-    let githubMessage = `### :bar_chart: ${imageType} Image Analysis  (Commit: ${commitSHA} )
-  #### Summary
+    let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
+   
+  const comment = {
+    body: githubMessage,
+    issue_number: context.issue.number
+  }
+  const commentQueue = (await readFromFile(fs,"comments.json")) || [];
+  commentQueue.push(comment);
+  await saveToFile(commentQueue, fs,"comments.json")
   
-  - **Current Size:** ${formatBytes(
-      imageSizeInBytes
-    )} ${calculatePercentageChange(imageSizeInBytes, metricToCompare?.imageSize || null)}
-  - **Previous Size :** ${formatBytes(metricToCompare?.imageSize || null)} 
-  `;
-    github.rest.issues.createComment({
-      issue_number: context.issue.number,
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      body: githubMessage,
-    });
   } else if (context.eventName == "push") {
-    const metrics = [
-      {
+    
+    const updatedMetric  =  {
         imageId: imageType,
         imageSize: imageSizeInBytes,
-      },
-    ];
-
-    await saveMetricsToFile(metrics, fs);
+      };
+    existingMetrics[imageType] = updatedMetric  
+    await saveToFile(metrics, "image-metrics-" + imageType + ".json");
   }
 };
