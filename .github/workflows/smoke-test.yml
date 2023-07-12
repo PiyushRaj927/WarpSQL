@@ -80,6 +80,13 @@ jobs:
       
       - name: export the image
         run : |
+          set -eu
+          export PGHOST=localhost
+          export PGUSER=postgres
+          export PGPASSWORD=test1234
+          docker container stop smoketest-container || true
+          docker container rm smoketest-container || true
+          docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=${PGPASSWORD} --name smoketest-container smoketest-image
           docker export smoketest-image > ${{matrix.type}}-${{ github.sha }}.tar 
             
       - name: Upload artifact
