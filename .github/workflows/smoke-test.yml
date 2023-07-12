@@ -80,11 +80,11 @@ jobs:
       
       - name: export the image
         run : |
-          docker export smoketest-image > ${{matrix.type}}-${{ github.ref }}.tar 
+          docker export smoketest-image > ${{matrix.type}}-${{ github.sha }}.tar 
             
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{matrix.type}}-${{ github.ref }}
-          path: ./${{matrix.type}}-${{ github.ref }}.tar 
+          name: ${{matrix.type}}-${{ github.sha }}
+          path: ./${{matrix.type}}-${{ github.sha }}.tar 
     
