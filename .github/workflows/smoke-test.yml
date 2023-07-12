@@ -87,7 +87,7 @@ jobs:
           docker container stop smoketest-container || true
           docker container rm smoketest-container || true
           docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=${PGPASSWORD} --name smoketest-container smoketest-image
-          docker export smoketest-image > ${{matrix.type}}-${{ github.sha }}.tar 
+          docker export smoketest-container  > ${{matrix.type}}-${{ github.sha }}.tar 
             
       - name: Upload artifact
         uses: actions/upload-artifact@v3
