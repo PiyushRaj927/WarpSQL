@@ -40,7 +40,7 @@ jobs:
         env: 
           EVENT: ${{github.event_name}}
         run: |
-          if [ $EVENT == 'pull_request']
+          if [ "$EVENT" == 'pull_request' ]
           then
               echo "commit=${{ github.event.pull_request.head.sha}}"  >> "$GITHUB_ENV"
           else
