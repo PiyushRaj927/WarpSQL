@@ -122,7 +122,7 @@ function createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToComp
   return githubMessage;
 }
 
-async function getPullNumber(workflow_run) {
+async function getPullNumber(github,workflow_run) {
   head = `${workflow_run.actor.login}:${workflow_run.head_branch}`
   let pr = await github.rest.pulls.list({
     owner:context.repo.owner,
@@ -161,7 +161,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
     const metricToCompare = (await readFromFile(fs,"image-metrics-" + imageType + ".json")) || {};
 
     let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
-   let issueNumber = await getPullNumber(context.payload.workflow_run);
+   let issueNumber = await getPullNumber(github,context.payload.workflow_run);
   const comment = {
     body: githubMessage,
     issue_number: issueNumber
