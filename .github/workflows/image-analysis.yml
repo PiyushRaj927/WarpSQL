@@ -52,7 +52,7 @@ jobs:
     
       - name: Load image
         run: |
-            docker load --input ./${{matrix.type}}-${{ github.event.workflow_run.head_sha  }}.tar 
+            cat ./${{matrix.type}}-${{ github.event.workflow_run.head_sha  }}.tar  | docker import - smoketest-image
       # set up dependency for github scripts
       - uses: actions/setup-node@v3
         with:
