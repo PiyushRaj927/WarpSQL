@@ -64,7 +64,7 @@ jobs:
           npm install fs
 
       - name: Download metrics
-        if: github.event_name == 'pull_request'
+        if: github.event.workflow_run.event == 'pull_request'
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
           workflow: image-analysis.yml
@@ -73,7 +73,7 @@ jobs:
           search_artifacts: true
           if_no_artifact_found: warn
       - name: Download comments
-        if: github.event_name == 'pull_request'
+        if: github.event.workflow_run.event == 'pull_request'
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
             workflow: image-analysis.yml
@@ -93,7 +93,7 @@ jobs:
 
       - name: Hide bot comments
         uses: kanga333/comment-hider@master
-        if: github.event_name == 'pull_request'
+        if: github.event.workflow_run.event == 'pull_request'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           hide_user_name: "github-actions[bot]"
@@ -102,13 +102,13 @@ jobs:
           issue_number: ${{ github.event.number}}
 
       - uses: actions/upload-artifact@v3
-        if: github.event_name == 'pull_request'
+        if: github.event.workflow_run.event == 'pull_request'
         with:
             name: image-analysis-comments
             path: comments.json
             if-no-files-found: error
       - uses: actions/upload-artifact@v3
-        if: github.event_name == 'push'
+        if: github.event.workflow_run.event == 'push'
         with:
           name: image-metric-${{matrix.type}}
           path: image-metrics-${{matrix.type}}.json
