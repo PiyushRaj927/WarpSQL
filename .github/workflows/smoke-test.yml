@@ -17,7 +17,7 @@ env:
 
 jobs:
   smoketest:
-    name: PG${{ matrix.pg }}-${{ matrix.type }}
+    name: PG${{ matrix.pg }}-${{ matrix.type }}-docker
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

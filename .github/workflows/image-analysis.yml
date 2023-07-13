@@ -17,7 +17,7 @@ env:
 
 jobs:
   image-analysis:
-    name: PG${{ matrix.pg }}-${{ matrix.type }}
+    name: PG${{ matrix.pg }}-${{ matrix.type }}-analysis
     runs-on: ubuntu-latest
     permissions: {}
     strategy:
@@ -32,7 +32,7 @@ jobs:
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: PG${{ matrix.pg }}-${{ matrix.type }}
+          checkName: PG${{ matrix.pg }}-${{ matrix.type }}-docker
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Do something with a failing build
