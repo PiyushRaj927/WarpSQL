@@ -32,7 +32,10 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            console.log(context.payload)
+            console.log(context)
+      - name: print debug
+        run: |
+              echo ${{ toJSON(github) }}
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
@@ -42,7 +45,8 @@ jobs:
             search_artifacts: true
             if_no_artifact_found: fail
             skip_unpack: true
-      - run: |
+      - name: "unzip"
+        run: |
           unzip ${{matrix.type}}-${{ github.event.workflow_run.head_sha }}.zip
     
       - name: Load image
