@@ -32,7 +32,6 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            console.log(github.event.workflow_run)
             console.log(context.payload)
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
