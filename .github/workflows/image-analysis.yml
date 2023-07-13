@@ -37,6 +37,9 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Check out the source
+        uses: actions/checkout@v3
+        
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
