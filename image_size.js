@@ -122,6 +122,15 @@ function createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToComp
   return githubMessage;
 }
 
+async function getPullNumber(workflow_run) {
+  head = `${workflow_run.actor.login}:${workflow_run.head_branch}`
+  let pr = await github.rest.pulls.list({
+    owner:context.repo.owner,
+    repo:context.repo.repo,
+    head:head
+  });
+  return  pr_number = pr[0].number
+}
 
 module.exports = async ({ github, context, exec, core, fs }) => {
   let commitSHA = context.sha;
@@ -153,10 +162,10 @@ module.exports = async ({ github, context, exec, core, fs }) => {
     const metricToCompare = existingMetrics[imageType];
 
     let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
-   
+   let issueNumber = await getPullNumber(context.payload.workflow_run)
   const comment = {
     body: githubMessage,
-    issue_number: context.issue.number
+    issue_number: issueNumber
   }
   const commentQueue = (await readFromFile(fs,"comments.json")) || [];
   commentQueue.push(comment);
