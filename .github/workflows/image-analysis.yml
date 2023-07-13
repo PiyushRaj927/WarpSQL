@@ -40,7 +40,7 @@ jobs:
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
-            workflow: image-analysis.yml
+            workflow: smoke-test.yml
             name: ${{matrix.type}}-${{ github.sha }}
             check_artifacts: true
             search_artifacts: true
