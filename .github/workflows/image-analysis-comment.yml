@@ -62,8 +62,9 @@ jobs:
               });
               comments.shift(); 
             } 
-      - uses: joutvhu/delete-artifact@v1
+      - name: Remove artifact
+        uses: philips-labs/action-delete-artifacts@v1.0.0
         with:
-          name: |
-            image-analysis-comments
-            
+          workflow: image-analysis.yml
+          name: image-analysis-comments
+          
