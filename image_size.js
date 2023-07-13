@@ -179,6 +179,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
         imageSize: imageSizeInBytes,
       };
     existingMetrics[imageType] = updatedMetric  
-    await saveToFile(metrics, "image-metrics-" + imageType + ".json");
+    console.log(existingMetrics);
+    await saveToFile(existingMetrics, "image-metrics-" + imageType + ".json");
   }
 };
