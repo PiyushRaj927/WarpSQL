@@ -27,16 +27,20 @@ jobs:
         type: ["normal", "bitnami"]
     steps:
         # wait till the smoke test is passed
-      - name: Pause until all workflows are completed
-        uses: willgarcia/workflow-wait-action@0.1.0
+      - name: Wait for build to succeed
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: wait-for-build
         with:
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-          timeout: 600
-          interval: 10
-          initial_delay: 30
-          workflows: |
-            Smoke Test Docker Image
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: smoketest
+          ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Do something with a failing build
+        if: steps.wait-for-build.outputs.conclusion == 'failure'
+        uses: actions/github-script@v6.4.1
+        with:
+          script: |
+              core.setFailed('Smoke Test Failed')
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
