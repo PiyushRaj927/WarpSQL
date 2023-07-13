@@ -157,9 +157,8 @@ module.exports = async ({ github, context, exec, core, fs }) => {
 
   const workspace = core.getInput("workspace", { required: true });
 
-  const existingMetrics = (await readFromFile(fs,"image-metrics-" + imageType + ".json")) || {};
-  if (context.eventName == "pull_request") {
-    const metricToCompare = existingMetrics[imageType];
+  if (context.payload.workflow_run.event == "pull_request") {
+    const metricToCompare = (await readFromFile(fs,"image-metrics-" + imageType + ".json")) || {};
 
     let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
    let issueNumber = await getPullNumber(context.payload.workflow_run);
@@ -172,14 +171,13 @@ module.exports = async ({ github, context, exec, core, fs }) => {
   console.log(commentQueue);
   await saveToFile(commentQueue, fs,"comments.json");
   
-  } else if (context.eventName == "push") {
+  } else if (context.payload.workflow_run.event == "push") {
     
     const updatedMetric  =  {
         imageId: imageType,
         imageSize: imageSizeInBytes,
       };
-    existingMetrics[imageType] = updatedMetric  
-    console.log(existingMetrics);
-    await saveToFile(existingMetrics, "image-metrics-" + imageType + ".json");
+    console.log(updatedMetric);
+    await saveToFile(updatedMetric, "image-metrics-" + imageType + ".json");
   }
 };
