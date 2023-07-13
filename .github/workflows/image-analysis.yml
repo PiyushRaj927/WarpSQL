@@ -22,13 +22,13 @@ jobs:
   image-analysis:
     name: PG${{ matrix.pg }}-${{ matrix.type }}-analysis
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.event.workflow_run.conclusion == 'success' }}
     permissions: {}
     strategy:
       fail-fast: false
       matrix:
         pg: [15]
         type: ["normal", "bitnami"]
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
         # wait till the smoke test is passed
       - name: Wait for build to succeed
