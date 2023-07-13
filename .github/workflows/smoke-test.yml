@@ -23,9 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         pg: [15]
-        type: ["normal", "bitnami"]
-    permissions:
-      pull-requests: write
+        type: ["normal"]
+        # type: ["normal", "bitnami"]
     steps:
       - name: Check out the source
         uses: actions/checkout@v3

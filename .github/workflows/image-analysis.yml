@@ -24,7 +24,8 @@ jobs:
       fail-fast: false
       matrix:
         pg: [15]
-        type: ["normal", "bitnami"]
+        type: ["normal"]
+        # type: ["normal", "bitnami"]
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: debug workflow_run
@@ -32,6 +33,7 @@ jobs:
         with:
           script: |
             console.log(github.event.workflow_run)
+            console.log(context.payload)
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
