@@ -162,14 +162,15 @@ module.exports = async ({ github, context, exec, core, fs }) => {
     const metricToCompare = existingMetrics[imageType];
 
     let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
-   let issueNumber = await getPullNumber(context.payload.workflow_run)
+   let issueNumber = await getPullNumber(context.payload.workflow_run);
   const comment = {
     body: githubMessage,
     issue_number: issueNumber
-  }
+  };
   const commentQueue = (await readFromFile(fs,"comments.json")) || [];
   commentQueue.push(comment);
-  await saveToFile(commentQueue, fs,"comments.json")
+  console.log(commentQueue);
+  await saveToFile(commentQueue, fs,"comments.json");
   
   } else if (context.eventName == "push") {
     
