@@ -27,32 +27,26 @@ jobs:
         type: ["normal", "bitnami"]
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-        # wait till the smoke test is passed
-      - name: Wait for build to succeed
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        id: wait-for-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: PG${{ matrix.pg }}-${{ matrix.type }}-docker
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Do something with a failing build
-        if: steps.wait-for-build.outputs.conclusion == 'failure'
+      - name: debug workflow_run
         uses: actions/github-script@v6.4.1
         with:
           script: |
-              core.setFailed('Smoke Test Failed')
+            console.log(github.event.workflow_run)
       - name: Download image
         uses: dawidd6/action-download-artifact@v2.27.0
         with:
             workflow: smoke-test.yml
-            name: ${{matrix.type}}-${{ github.sha }}
+            name: ${{matrix.type}}-${{ github.event.workflow_run.pull_requests.head.ref  }}
             check_artifacts: true
             search_artifacts: true
+            if_no_artifact_found: fail
+            skip_unpack: true
+      - run: |
+          unzip ${{matrix.type}}-${{ github.event.workflow_run.pull_requests.head.ref }}.zip
     
       - name: Load image
         run: |
-            docker load --input ./${{matrix.type}}-${{ github.sha }}.tar 
+            docker load --input ./${{matrix.type}}-${{ github.event.workflow_run.pull_requests.head.ref  }}.tar 
       # set up dependency for github scripts
       - uses: actions/setup-node@v3
         with:
