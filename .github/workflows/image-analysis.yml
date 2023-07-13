@@ -22,7 +22,7 @@ jobs:
   image-analysis:
     name: PG${{ matrix.pg }}-${{ matrix.type }}-analysis
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' && github.event.workflow_run.conclusion == 'success' }}
     permissions: {}
     strategy:
       fail-fast: false
