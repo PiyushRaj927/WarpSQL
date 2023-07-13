@@ -62,6 +62,8 @@ jobs:
               });
               comments.shift(); 
             } 
-      - uses: geekyeggo/delete-artifact@v2
+      - uses: joutvhu/delete-artifact@v1
         with:
-            name: image-analysis-comments
+          name: |
+            image-analysis-comments
+            
