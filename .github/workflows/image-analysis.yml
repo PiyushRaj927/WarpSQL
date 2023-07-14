@@ -98,7 +98,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           hide_user_name: "github-actions[bot]"
           hide_reason: "OUTDATED"
-          leave_visible: 2
+          leave_visible: 0
           issue_number: ${{ github.event.number}}
 
       - uses: actions/upload-artifact@v3
@@ -113,3 +113,10 @@ jobs:
           name: image-metric-${{matrix.type}}
           path: image-metrics-${{matrix.type}}.json
           if-no-files-found: error
+      - name: Delete Artifact by Name
+        uses: jimschubert/delete-artifacts-action@v1
+        with:
+          log_level: 'debug'
+          artifact_name: ${{matrix.type}}-${{ github.event.workflow_run.head_sha  }}
+          min_bytes: '0'
+            
