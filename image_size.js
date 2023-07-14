@@ -43,7 +43,7 @@ function parseSizeToBytes(value, unit) {
 }
 
 function formatBytes(bytes, decimals = 2) {
-  if (bytes == null ) return "Unknown"
+  if (bytes == null ) return "Unknown";
   if (!+bytes) return "0 Bytes";
 
   const k = 1024;
@@ -122,14 +122,14 @@ function createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToComp
   return githubMessage;
 }
 
-async function getPullNumber(github,workflow_run) {
-  head = `${workflow_run.actor.login}:${workflow_run.head_branch}`
+async function getPullNumber(github,workflow_run,context) {
+  let head = `${workflow_run.actor.login}:${workflow_run.head_branch}`;
   let pr = await github.rest.pulls.list({
     owner:context.repo.owner,
     repo:context.repo.repo,
     head:head
   });
-  return  pr_number = pr[0].number
+  return pr[0].number;
 }
 
 module.exports = async ({ github, context, exec, core, fs }) => {
@@ -141,7 +141,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
     "{{.Size}}",
     "smoketest-image",
   ]);
-  imageSizeInBytes = parseSizeToBytes(
+  let imageSizeInBytes = parseSizeToBytes(
     imageSize.trim().slice(0, -2),
     imageSize.trim().slice(-2)
   );
@@ -161,7 +161,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
     const metricToCompare = (await readFromFile(fs,"image-metrics-" + imageType + ".json")) || {};
 
     let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
-   let issueNumber = await getPullNumber(github,context.payload.workflow_run);
+   let issueNumber = await getPullNumber(github,context.payload.workflow_run,context);
   const comment = {
     body: githubMessage,
     issue_number: issueNumber
