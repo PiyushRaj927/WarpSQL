@@ -122,14 +122,21 @@ function createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToComp
   return githubMessage;
 }
 
-async function getPullNumber(github,workflow_run,context) {
+async function getPullNumber(github,workflow_run,context,core) {
   let head = `${workflow_run.actor.login}:${workflow_run.head_branch}`;
-  let pr = await github.rest.pulls.list({
+  let prNumber = (await github.rest.pulls.list({
     owner:context.repo.owner,
     repo:context.repo.repo,
     head:head
-  });
-  return pr[0].number;
+  })).data[0]?.number;
+  if (prNumber != undefined) {
+    console.log(`Found PR number ${prNumber} based on base and head branches`);
+  } else {
+    core.setFailed(`Action failed: Pull-Request Number NOt found with head: ${head}`);
+  }
+
+  console.log(prNumber);
+  return prNumber;
 }
 
 module.exports = async ({ github, context, exec, core, fs }) => {
@@ -161,7 +168,7 @@ module.exports = async ({ github, context, exec, core, fs }) => {
     const metricToCompare = (await readFromFile(fs,"image-metrics-" + imageType + ".json")) || {};
 
     let githubMessage = createIssueComment(imageType, commitSHA, imageSizeInBytes, metricToCompare);
-   let issueNumber = await getPullNumber(github,context.payload.workflow_run,context);
+   let issueNumber = await getPullNumber(github,context.payload.workflow_run,context,core);
   const comment = {
     body: githubMessage,
     issue_number: issueNumber
