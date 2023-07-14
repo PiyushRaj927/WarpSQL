@@ -131,6 +131,7 @@ async function getPullNumber(github,workflow_run,context,core) {
   })).data[0]?.number;
   if (prNumber != undefined) {
     console.log(`Found PR number ${prNumber} based on base and head branches`);
+    core.exportVariable('pull_request_number', prNumber);
   } else {
     core.setFailed(`Action failed: Pull-Request Number NOt found with head: ${head}`);
   }
