@@ -106,7 +106,7 @@ jobs:
           docker container stop smoketest-container || true
           docker container rm smoketest-container || true
           docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=${PGPASSWORD} --name smoketest-container smoketest-image
-          docker image --all
+          docker images --all
           docker image history smoketest-image
           docker export smoketest-container  > ${{matrix.type}}-${{  env.commit  }}.tar 
           exit 5
