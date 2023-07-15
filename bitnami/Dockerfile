@@ -322,6 +322,8 @@ RUN apt-get update -y -qq --fix-missing \
     && git clone https://github.com/zombodb/zombodb.git \
     && cd zombodb \
     && export PATH="/.cargo/bin:$PATH" && cargo pgrx install --release
+    && rm -rf ./zombodb \
+ 
 
 USER 1001
 

@@ -109,7 +109,6 @@ jobs:
           docker images --all
           docker image history smoketest-image
           docker export smoketest-container  > ${{matrix.type}}-${{  env.commit  }}.tar 
-          exit 5
             
       - name: Upload artifact
         uses: actions/upload-artifact@v3
