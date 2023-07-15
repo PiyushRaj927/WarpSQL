@@ -321,8 +321,8 @@ RUN apt-get update -y -qq --fix-missing \
     && cargo pgrx init --pg${PG_MAJOR}=/opt/bitnami/postgresql/bin/pg_config \
     && git clone https://github.com/zombodb/zombodb.git \
     && cd zombodb \
-    && export PATH="/.cargo/bin:$PATH" && cargo pgrx install --release
-    && rm -rf ./zombodb \
+    && export PATH="/.cargo/bin:$PATH" && cargo pgrx install --release \
+    && rm -rf ./zombodb 
  
 
 USER 1001
