@@ -77,7 +77,7 @@ default: image
 
 build-docker-cache: Dockerfile
 	docker buildx create --use --driver=docker-container
-	docker buildx  build  --progress=plain --load --cache-to "type=gha,mode=max" --cache-from "type=gha,scope=main-alpine"  $(DOCKER_BUILD_ARGS) $(TAG) .
+	docker buildx build --progress=plain --load --cache-to "type=gha,mode=max" --cache-from type=gha $(DOCKER_BUILD_ARGS) $(TAG) .
 	touch .build_$(TS_VERSION)_$(PG_VER)
 
 image: .build_$(TS_VERSION)_$(PG_VER)
