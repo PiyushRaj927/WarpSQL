@@ -319,7 +319,7 @@ check_env_variables POSTGRES_HLL_VERSION
 }
 
 
-# enable contrib extentions
+# enable contrib extensions
 sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'pg_stat_statements,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
 
 

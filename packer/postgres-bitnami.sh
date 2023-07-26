@@ -316,7 +316,7 @@ check_env_variables POSTGRES_HLL_VERSION
 }
 
 
-# enable contrib extentions
+# enable contrib extensions
 # sed -r -i  's/[#]*\s*(POSTGRESQL_SHARED_PRELOAD_LIBRARIES)\s*=\s*"(.*)"/\1="pg_stat_statements,\2"/;s/,"/"/' /opt/bitnami/scripts/postgresql/timescaledb-bitnami-entrypoint.sh
 
 
