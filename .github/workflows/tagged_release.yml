@@ -47,7 +47,7 @@ jobs:
             make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} \
             TS_VERSION=$TS_VERSION TAG=$TAG PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
         env:
-            TAG: -t samagragovernance/postgres:${{inputs.version}}-pg${{ matrix.pg }}
+            TAG: "-t samagragovernance/postgres:${{inputs.version}}-pg${{ matrix.pg }}"
   # Build bitnami images of TimscaleDB.
   # The images are built only for amd64, since it is the only supported architecture in the base image bitname/postgresql.
   # The images are only built for TSL code.
@@ -74,4 +74,4 @@ jobs:
           make push ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION BETA=$BETA TAG=$TAG
         working-directory: bitnami
         env:
-            TAG: -t timescaledev/timescaledb:${{inputs.version}}-pg${{ matrix.pg }}-bitnami
+            TAG: "-t timescaledev/timescaledb:${{inputs.version}}-pg${{ matrix.pg }}-bitnami"
