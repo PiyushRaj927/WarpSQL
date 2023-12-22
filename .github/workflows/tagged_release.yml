@@ -7,7 +7,7 @@ on:
         required: true
       ORG:
           description: 'the organization for tagging Docker images'
-          required: false
+          required: true
           default: "samagragovernance"
 env:
   ORG: ${{inputs.ORG}}
