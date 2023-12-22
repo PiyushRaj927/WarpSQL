@@ -45,9 +45,9 @@ jobs:
       - name: Build and push multi-platform Docker image for postgres
         run: |
             make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} \
-            TS_VERSION=$TS_VERSION TAG="$TAG" PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
+            TS_VERSION=$TS_VERSION TAG_VERSION="$TAG_VERSION" PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
         env:
-            TAG: "-t samagragovernance/postgres:${{inputs.version}}-pg${{ matrix.pg }}"
+            TAG_VERSION: "samagragovernance/postgres:${{inputs.version}}-pg${{ matrix.pg }}"
   # Build bitnami images of TimscaleDB.
   # The images are built only for amd64, since it is the only supported architecture in the base image bitname/postgresql.
   # The images are only built for TSL code.
@@ -71,7 +71,7 @@ jobs:
       - name: Build and push amd64 Docker image for TimescaleDB bitnami
         run: |
           export BETA=1
-          make push ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION BETA=$BETA TAG="$TAG"
+          make push ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION BETA=$BETA TAG_VERSION="$TAG_VERSION"
         working-directory: bitnami
         env:
-            TAG: "-t timescaledev/timescaledb:${{inputs.version}}-pg${{ matrix.pg }}-bitnami"
+          TAG_VERSION: "timescaledev/timescaledb:${{inputs.version}}-pg${{ matrix.pg }}-bitnami"
