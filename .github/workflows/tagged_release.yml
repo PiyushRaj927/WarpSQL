@@ -5,9 +5,12 @@ on:
       version:
         description: 'Version to release'
         required: true
-      
+      ORG:
+          description: 'the organization for tagging Docker images'
+          required: true
+          default: "samagragovernance"
 env:
-  ORG: samagragovernance
+  ORG: ${{inputs.ORG}}
   TS_VERSION: main
   BETA: 1 # prevents the latest tag from being pushed.
 jobs:
